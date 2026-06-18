@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOREST-SMP</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="shop-container" style="padding: 50px; text-align: center; font-family: sans-serif;">
+        <h1 style="color: rgb(33, 216, 57); margin-bottom: 30px;">FOREST-SMP</h1>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <div class="card" style="background: rgba(25, 25, 35, 0.65); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); width: 220px; color: white;">
+                <h3>AZLEA RANK</h3>
+                <p style="color: #00e676; font-size: 20px; font-weight: bold;">$5.00</p>
+                <button onclick="openModal('AZLEA', 5.00)" style="padding: 12px 24px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; width: 100%;">Buy Now</button>
+            </div>
+            <div class="card" style="background: rgba(25, 25, 35, 0.65); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.08); width: 220px; color: white;">
+                <h3>ACACIA RANK</h3>
+                <p style="color: #00e676; font-size: 20px; font-weight: bold;">$15.00</p>
+                <button onclick="openModal('ACACIA', 15.00)" style="padding: 12px 24px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 8px; font-weight: bold; width: 100%;">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="buyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            
+            <h2>BUY RANK: <span id="modal-rank-name" style="color: var(--primary-color); text-shadow: 0 0 10px rgba(0,123,255,0.3);"></span></h2>
+            <p style="color: var(--text-muted); margin-top: 0; font-size: 14px;">បំពេញព័ត៌មានខាងក្រោមដើម្បីបន្តការទិញ</p>
+            
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 20px 0;">
+
+            <div id="step-1-input">
+                <form onsubmit="goToStep2(event)">
+                    <div class="input-group">
+                        <label>Minecraft Username</label>
+                        <input type="text" id="mc-username" required placeholder="your minecraft username">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="mc-email" required placeholder="your email address">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Promo Code</label>
+                        <div class="promo-container">
+                            <input type="text" id="mc-promo" placeholder="Put it here">
+                            <button type="button" class="btn-promo" onclick="applyPromo()">Apply</button>
+                        </div>
+                        <span id="promo-message" style="font-size: 12px; display: block; margin-top: 5px;"></span>
+                    </div>
+
+                    <button type="submit" class="btn-block btn-primary" style="margin-top: 10px;">Submit (បញ្ជូន)</button>
+                </form>
+            </div>
+
+            <div id="step-2-verify" style="display: none; text-align: center;">
+                <div class="verify-box">
+                    <div style="color: var(--warning-color); font-weight: bold; margin-bottom: 15px; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span></span> សូមផ្ទៀងផ្ទាត់ព័ត៌មានរបស់អ្នក៖
+                    </div>
+                    <div class="verify-row">
+                        <span class="verify-label">Username</span>
+                        <span class="verify-value" id="verify-username"></span>
+                    </div>
+                    <div class="verify-row">
+                        <span class="verify-label">Email</span>
+                        <span class="verify-value" id="verify-email" style="font-size: 13px;"></span>
+                    </div>
+                    <div class="verify-row">
+                        <span class="verify-label">Rank</span>
+                        <span class="verify-value" id="verify-rank" style="color: var(--primary-color);"></span>
+                    </div>
+                    <div class="verify-row" id="promo-row" style="display: none;">
+                        <span class="verify-label">Discount</span>
+                        <span class="verify-value" id="verify-discount" style="color: #ff5252;">-$0.00</span>
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    <span class="total-title">Total</span>
+                    <span class="total-amount" id="verify-total">$0.00</span>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 25px;">
+                    <button onclick="backToStep1()" class="btn-block btn-secondary" style="flex: 1;">Back</button>
+                    <button onclick="generatePayment()" class="btn-block btn-success" style="flex: 1;">Next</button>
+                </div>
+            </div>
+
+            <div id="step-3-payment" style="display: none; text-align: center;">
+                <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 5px;">សូមបើកកម្មវិធីធនាគារ រួចស្កែន KHQR ដើម្បីទូទាត់៖</p>
+                <div class="qr-holder">
+                    <canvas id="khqr-canvas"></canvas>
+                </div>
+                
+                <div style="background: rgba(255, 152, 0, 0.1); padding: 10px 18px; border-radius: 10px; font-size: 14px; color: var(--warning-color); font-weight: bold; display: inline-flex; align-items: center; gap: 8px;">
+                    <span class="spinner"></span>
+                    កំពុងរង់ចាំការស្កែនផ្ទៀងផ្ទាត់...
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
