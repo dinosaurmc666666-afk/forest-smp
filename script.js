@@ -33,7 +33,7 @@ function applyPromo() {
     const code = document.getElementById('mc-promo').value.trim().toUpperCase();
     const msg = document.getElementById('promo-message');
     
-    if (code === "FORESTMC20") { // កូដបញ្ចុះតម្លៃ ២០%
+    if (code === "FORESTMC20") { 
         discountAmount = selectedPrice * 0.20;
         finalPrice = selectedPrice - discountAmount;
         msg.style.color = "#00e676";
@@ -69,7 +69,6 @@ function goToStep2(event) {
         document.getElementById('promo-row').style.display = "none";
     }
     
-    // បង្ហាញតម្លៃសរុប (Total Amount)
     document.getElementById('verify-total').innerText = "$" + finalPrice.toFixed(2);
     
     document.getElementById('step-1-input').style.display = 'none';
@@ -90,7 +89,8 @@ function generatePayment() {
     document.getElementById('step-2-verify').style.display = 'none';
     document.getElementById('step-3-payment').style.display = 'block';
 
-    fetch("http://127.0.0.1:5000/api/generate-qr", {
+    // 🔗 ភ្ជាប់ទៅកាន់ Render Backend URL របស់អ្នក
+    fetch("https://pay-pszc.onrender.com/api/generate-qr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -114,7 +114,7 @@ function generatePayment() {
         }
     })
     .catch(err => {
-        alert("កំហុស៖ មិនអាចតភ្ជាប់ទៅ Python បានឡើយ។ សូមប្រាកដថាបានរត់ `python pay.py`។");
+        alert("កំហុស៖ មិនអាចតភ្ជាប់ទៅ Python Cloud Server បានឡើយ។ សូមប្រាកដថាប្រព័ន្ធនៅលើ Render បានរត់ (Live) ជោគជ័យ។");
         closeModal();
     });
 }
@@ -122,7 +122,8 @@ function generatePayment() {
 // ប្រព័ន្ធ Polling ឆែកលុយចូល
 function startCheckingPayment(orderId, username, qrCodeString) {
     checkInterval = setInterval(() => {
-        fetch("http://127.0.0.1:5000/api/check-payment", {
+        // 🔗 ភ្ជាប់ទៅកាន់ Render Backend URL របស់អ្នកដើម្បី Check ស្ថានភាពលុយ
+        fetch("https://pay-pszc.onrender.com/api/check-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
