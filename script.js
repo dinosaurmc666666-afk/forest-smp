@@ -16,7 +16,7 @@ let paymentConfirmed = false;
 
 // ================= SAFE ERROR HANDLER =================
 function getErrorMessage(res) {
-    return res?.message || res?.error || "Unknown error";
+    return res?.error || res?.message || "Unknown error";
 }
 
 // ================= NAVIGATION =================
@@ -122,14 +122,14 @@ async function confirmAndPay() {
             body: JSON.stringify(payload)
         });
 
-        let result;
-        try {
-            result = await res.json();
-        } catch {
-            throw new Error("Server response invalid JSON");
-        }
+        const result = await res.json().catch(() => null);
 
-        if (result?.status === "success") {
+        // ================= FIX: SUPPORT BOTH API FORMAT =================
+        const isSuccess =
+            result?.success === true ||
+            result?.status === "success";
+
+        if (isSuccess) {
 
             document.getElementById("qrcode-box").innerHTML = "";
 
@@ -149,7 +149,7 @@ async function confirmAndPay() {
 
     } catch (err) {
         console.error(err);
-        alert("❌ មិនអាចភ្ជាប់ Server បានទេ!");
+        alert("❌ Server មិនអាចភ្ជាប់បាន");
         closeModal();
     }
 
@@ -165,12 +165,14 @@ function startCountdownTimer(seconds) {
 
     countdownInterval = setInterval(() => {
 
-        let m = String(Math.floor(timer / 60)).padStart(2, "0");
-        let s = String(timer % 60).padStart(2, "0");
+        const m = String(Math.floor(timer / 60)).padStart(2, "0");
+        const s = String(timer % 60).padStart(2, "0");
 
         if (display) display.innerText = `${m}:${s}`;
 
-        if (--timer < 0) {
+        timer--;
+
+        if (timer < 0) {
 
             if (paymentConfirmed) return;
 
@@ -192,9 +194,13 @@ function startPaymentPolling(transactionId) {
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/check-status/${transactionId}`);
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
 
-            if (data?.status === "success" && data?.order_status === "paid") {
+            const isPaid =
+                data?.success === true &&
+                data?.order_status === "paid";
+
+            if (isPaid) {
 
                 paymentConfirmed = true;
 
