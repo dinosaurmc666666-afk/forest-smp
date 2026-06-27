@@ -12,22 +12,21 @@ let currentOrder = {
 
 let countdownInterval = null;
 let statusPollInterval = null;
-
-// 🔒 IMPORTANT LOCK FLAG (FIX AUTO CLOSE BUG)
 let paymentConfirmed = false;
+
+// ================= SAFE ERROR HANDLER =================
+function getErrorMessage(res) {
+    return res?.message || res?.error || "Unknown error";
+}
 
 // ================= NAVIGATION =================
 function showPage(pageId) {
-    document.querySelectorAll('.store-page').forEach(page => {
-        page.classList.remove('active');
-    });
+    document.querySelectorAll('.store-page').forEach(p => p.classList.remove('active'));
 
     const page = document.getElementById(`page-${pageId}`);
     if (page) page.classList.add('active');
 
-    if (pageId === 'rank') {
-        backToSelectStep();
-    }
+    if (pageId === 'rank') backToSelectStep();
 }
 
 // ================= SELECT ITEM =================
@@ -36,9 +35,7 @@ function selectItem(category, value, price) {
     currentOrder.value = value;
     currentOrder.price = price;
 
-    document.querySelectorAll('.rank-card').forEach(card => {
-        card.classList.remove('selected');
-    });
+    document.querySelectorAll('.rank-card').forEach(c => c.classList.remove('selected'));
 
     const card = document.getElementById(`card-${value}`);
     if (card) card.classList.add('selected');
@@ -51,8 +48,8 @@ function goToFormStep() {
         return;
     }
 
-    document.getElementById('rank-step-select').classList.remove('active');
-    document.getElementById('rank-step-form').classList.add('active');
+    document.getElementById('rank-step-select')?.classList.remove('active');
+    document.getElementById('rank-step-form')?.classList.add('active');
 }
 
 function backToSelectStep() {
@@ -102,7 +99,6 @@ function backToFormStep() {
 // ================= PAYMENT =================
 async function confirmAndPay() {
 
-    // 🔒 RESET LOCK EVERY NEW PAYMENT
     paymentConfirmed = false;
 
     const payBtn = document.getElementById('pay-btn');
@@ -110,7 +106,7 @@ async function confirmAndPay() {
 
     document.getElementById("paymentModal").style.display = "block";
     document.getElementById("qrcode-box").innerHTML =
-        "<p style='font-size:13px;color:#666;'>កំពុងបង្កើត QR...</p>";
+        "<p style='color:#666;font-size:13px;'>កំពុងបង្កើត QR...</p>";
 
     const payload = {
         player_name: currentOrder.ign,
@@ -120,15 +116,20 @@ async function confirmAndPay() {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/create-order`, {
+        const res = await fetch(`${API_BASE_URL}/api/create-order`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        let result;
+        try {
+            result = await res.json();
+        } catch {
+            throw new Error("Server response invalid JSON");
+        }
 
-        if (result.status === "success") {
+        if (result?.status === "success") {
 
             document.getElementById("qrcode-box").innerHTML = "";
 
@@ -142,13 +143,13 @@ async function confirmAndPay() {
             startPaymentPolling(result.transaction_id);
 
         } else {
-            alert("⚠️ " + result.message);
+            alert("⚠️ " + getErrorMessage(result));
             closeModal();
         }
 
     } catch (err) {
         console.error(err);
-        alert("❌ Server Error");
+        alert("❌ មិនអាចភ្ជាប់ Server បានទេ!");
         closeModal();
     }
 
@@ -167,11 +168,10 @@ function startCountdownTimer(seconds) {
         let m = String(Math.floor(timer / 60)).padStart(2, "0");
         let s = String(timer % 60).padStart(2, "0");
 
-        display.innerText = `${m}:${s}`;
+        if (display) display.innerText = `${m}:${s}`;
 
         if (--timer < 0) {
 
-            // 🔒 STOP IF ALREADY PAID
             if (paymentConfirmed) return;
 
             clearInterval(countdownInterval);
@@ -189,13 +189,13 @@ function startPaymentPolling(transactionId) {
     clearInterval(statusPollInterval);
 
     statusPollInterval = setInterval(async () => {
+
         try {
             const res = await fetch(`${API_BASE_URL}/api/check-status/${transactionId}`);
             const data = await res.json();
 
-            if (data.status === "success" && data.order_status === "paid") {
+            if (data?.status === "success" && data?.order_status === "paid") {
 
-                // 🔒 LOCK PAYMENT
                 paymentConfirmed = true;
 
                 clearInterval(countdownInterval);
@@ -208,6 +208,7 @@ function startPaymentPolling(transactionId) {
         } catch (err) {
             console.error("Polling error:", err);
         }
+
     }, 4000);
 }
 
@@ -226,7 +227,7 @@ function closeSuccessAlert() {
         modal.style.display = "none";
         resetOrder();
         showPage("home");
-    }, 3000);
+    }, 300);
 }
 
 // ================= CLOSE MODAL =================
@@ -247,7 +248,5 @@ function resetOrder() {
         platform: ''
     };
 
-    document.querySelectorAll(".rank-card").forEach(c => {
-        c.classList.remove("selected");
-    });
+    document.querySelectorAll(".rank-card").forEach(c => c.classList.remove("selected"));
 }
