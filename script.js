@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.apsara.lol"; // Fixed port to match Python backend
+const API_BASE_URL = "https://api.apsara.lol";
 
 // Object សម្រាប់ផ្ទុកទិន្នន័យនៃការទិញបច្ចុប្បន្ន
 let currentOrder = {
@@ -125,9 +125,10 @@ async function confirmAndPay() {
             closeModal();
         }
     } catch (error) {
-        alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ!");
-        closeModal();
-    }
+    console.error("API Error:", error); // ពិនិត្យក្នុង Console F12
+    alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ! សូមពិនិត្យមើល Cloudflare Tunnel នៅលើ Server។");
+    closeModal();
+}
 }
 
 // ⏰ យន្តការរាប់ថយក្រោយ ៧ នាទី
