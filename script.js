@@ -1,5 +1,4 @@
-// កំណត់ URL ទៅកាន់ Cloudflare Tunnel របស់អ្នក (HTTPS ពេញលេញ)
-const API_BASE_URL = "https://api.apsara.lol";
+const API_BASE_URL = "http://127.0.0.1:55071"; // Fixed port to match Python backend
 
 // Object សម្រាប់ផ្ទុកទិន្នន័យនៃការទិញបច្ចុប្បន្ន
 let currentOrder = {
@@ -94,7 +93,7 @@ async function confirmAndPay() {
     const payload = {
         player_name: currentOrder.ign,
         platform: currentOrder.platform,
-        category: currentOrder.category.toLowerCase(), // Backend ទាមទារអក្សរតូច 'rank'
+        category: currentOrder.category.toLowerCase(), // Fixed: backend forces lowercase 'rank'
         value: currentOrder.value
     };
 
@@ -104,7 +103,6 @@ async function confirmAndPay() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
-        
         const result = await response.json();
 
         if (result.status === "success") {
@@ -123,14 +121,11 @@ async function confirmAndPay() {
             startPaymentPolling(result.transaction_id);
 
         } else {
-            // ការពារកុំឱ្យលោត undefined
-            const errorMsg = result.message || "មិនអាចបង្កើតកូដបង់ប្រាក់បានទេ";
-            alert("⚠️ ដំណើរការខុសប្រក្រតី: " + errorMsg);
+            alert("⚠️ ដំណើរការខុសប្រក្រតី: " + result.message);
             closeModal();
         }
     } catch (error) {
-        console.error("API Fetch Error:", error);
-        alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ! សូមពិនិត្យមើលការតភ្ជាប់ ឬ Server របស់អ្នក។");
+        alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ!");
         closeModal();
     }
 }
@@ -155,9 +150,9 @@ function startCountdownTimer(durationInSeconds) {
             clearInterval(countdownInterval);
             clearInterval(statusPollInterval); // ឈប់ឆែកស្ថានភាពបង់ប្រាក់
             
-            // បង្ហាញ Overlay ប្រាប់ថា QR លែងដំណើរការហើយ
+            // បង្ហាញ Overlay ប្រាប់ថា QR លែងដំណើរការហើយ (បដិសេធចោល)
             document.getElementById("qr-timeout-overlay").style.display = "flex";
-            document.getElementById("payment-spinner").innerHTML = "<p style='color:red;font-weight:bold;'>❌ កូដបង់ប្រាក់នេះផុតកំណត់ហើយ!</p>";
+            document.getElementById("payment-spinner").innerHTML = "<p style='color:red;font-weight:bold;'>❌ កូដបង់ប្រាក់នេះត្រូវបានបដិសេធដោយប្រព័ន្ធធនាគារ!</p>";
             
             // បិទផ្ទាំងទូទាត់ក្រោយពេល ៤ វិនាទី
             setTimeout(closeModal, 4000);
@@ -172,10 +167,6 @@ function startPaymentPolling(transactionId) {
     statusPollInterval = setInterval(async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/api/check-status/${transactionId}`);
-            
-            // ប្រសិនបើ response មិនមែន 200 OK ទេ មិនបាច់ Parse JSON ទេ ដើម្បីការពារ Error
-            if (!response.ok) return; 
-
             const result = await response.json();
 
             if (result.status === "success" && result.order_status === "paid") {
@@ -188,12 +179,12 @@ function startPaymentPolling(transactionId) {
                 triggerSuccessAlert();
             }
         } catch (error) {
-            console.error("Polling error (អាចមកពី Network ធ្លាក់ចុះ):", error);
+            console.error("Polling error:", error);
         }
     }, 4000);
 }
 
-// 🌟 បើក Custom Success Alert
+// <tr> បើក Custom Success Alert
 function triggerSuccessAlert() {
     const alertModal = document.getElementById("successAlert");
     alertModal.style.display = "flex";
@@ -210,7 +201,6 @@ function closeSuccessAlert() {
     }, 300);
 }
 
-// ❌ បិទ Modal ទូទាត់ធម្មតា
 function closeModal() {
     document.getElementById("paymentModal").style.display = "none";
     if (countdownInterval) clearInterval(countdownInterval);
