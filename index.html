@@ -1,142 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="km">
 <head>
-    <meta charset="UTF-8">
+    <title>Merchant Shop</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOREST-SMP Store</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' https://checkout.bakongrelay.com wss://checkout.bakongrelay.com;">
+    <script src="https://checkout.bakongrelay.com/static/js/checkout.min.js"></script>
 </head>
-<body>
+<body style="background-color: #104e4e;">
 
-    <nav class="navbar">
-        <div class="nav-logo" onclick="showPage('home')">FOREST-SMP</div>
-        <ul class="nav-links">
-            <li><a href="#" onclick="showPage('home')">Home</a></li>
-            <li><a href="#" onclick="showPage('rank')">Rank</a></li>
-            <li><a href="#" onclick="showPage('life')">Life</a></li>
-            <li><a href="#" onclick="showPage('support')">Support</a></li>
-        </ul>
-    </nav>
+    <button onclick="BakongRelay.pay('pQOjrGGv1Xkr')" style="padding: 15px; background: #0b2447; color: white;">
+        Checkout Now
+    </button>
 
-    <div class="container">
-        
-        <section id="page-home" class="store-page active">
-            <div class="welcome-text">
-                <h1>Welcome to FOREST-SMP</h1>
-                <p>សូមជ្រើសរើសប្រភេទសេវាកម្មដែលអ្នកចង់ទិញនៅខាងក្រោម</p>
-                <button class="btn-primary" style="margin-top:20px;" onclick="showPage('rank')">ទិញ Rank ឥឡូវនេះ</button>
-            </div>
-        </section>
-
-        <section id="page-rank" class="store-page">
-            
-            <div id="rank-step-select" class="step-container active">
-                <h2>ជ្រើសរើស Rank របស់អ្នក</h2>
-                <div class="rank-grid">
-                    <div class="rank-card" id="card-Acacia" onclick="selectItem('rank', 'Acacia', 0.01)">
-                        <h3>Acacia Rank</h3>
-                        <p class="price">$0.01</p>
-                    </div>
-                    <div class="rank-card" id="card-Azalea" onclick="selectItem('rank', 'Azalea', 0.02)">
-                        <h3>Azalea Rank</h3>
-                        <p class="price">$0.02</p>
-                    </div>
-                    <div class="rank-card" id="card-Jungle" onclick="selectItem('rank', 'Jungle', 0.03)">
-                        <h3>Jungle Rank</h3>
-                        <p class="price">$0.03</p>
-                    </div>
-                </div>
-                <button class="btn-primary" onclick="goToFormStep()">បន្តទៅមុខ ➡️</button>
-            </div>
-
-            <div id="rank-step-form" class="step-container">
-                <h2>បំពេញព័ត៌មានគណនី</h2>
-                <div class="form-group">
-                    <label>ឈ្មោះក្នុងហ្គេម (IGN):</label>
-                    <input type="text" id="input-ign" placeholder="ឧទាហរណ៍: VannyDev">
-                </div>
-                <div class="form-group">
-                    <label>អុីមែល (Email):</label>
-                    <input type="email" id="input-email" placeholder="បញ្ចូលអុីមែលរបស់អ្នក">
-                </div>
-                <div class="form-group">
-                    <label>ប្រភេទ (Platform):</label>
-                    <select id="input-platform">
-                        <option value="Java">Minecraft Java</option>
-                        <option value="Bedrock">Minecraft Bedrock</option>
-                    </select>
-                </div>
-                <div class="button-group">
-                    <button class="btn-secondary" onclick="backToSelectStep()">⬅️ ត្រឡប់ក្រោយ</button>
-                    <button class="btn-primary" onclick="goToCheckoutStep()">ពិនិត្យទិន្នន័យ ➡️</button>
-                </div>
-            </div>
-
-            <div id="rank-step-checkout" class="step-container">
-                <h2>ពិនិត្យការបញ្ជាទិញ</h2>
-                <div class="checkout-details">
-                    <p><strong>ប្រភេទ:</strong> <span id="chk-category"></span></p>
-                    <p><strong>ទំនិញ:</strong> <span id="chk-item"></span></p>
-                    <p><strong>IGN:</strong> <span id="chk-ign"></span></p>
-                    <p><strong>Email:</strong> <span id="chk-email"></span></p>
-                    <p><strong>Platform:</strong> <span id="chk-platform"></span></p>
-                    <hr>
-                    <h3 class="total-price">សរុប: <span id="chk-usd"></span></h3>
-                </div>
-                <div class="button-group">
-                    <button class="btn-secondary" onclick="backToFormStep()">⬅️ កែប្រែ</button>
-                    <button class="btn-success" onclick="confirmAndPay()">ទូទាត់ប្រាក់ 💸</button>
-                </div>
-            </div>
-
-        </section>
-
-        <section id="page-life" class="store-page"><center><h2>Life System (Coming Soon)</h2></center></section>
-        <section id="page-support" class="store-page"><center><h2>Support Center</h2></center></section>
-    </div>
-
-    <div id="paymentModal" class="modal">
-        <div class="modal-content">
-            <h2 class="khqr-title">KHQR PAYMENT</h2>
-            <p class="khqr-subtitle">ស្កេនជាមួយគ្រប់កម្មវិធីធនាគារក្នុងស្រុក</p>
-            
-            <div class="qr-container">
-                <div id="qrcode-box"></div>
-                <div id="qr-timeout-overlay" class="timeout-overlay" style="display: none;">
-                    <p>❌ កូដផុតកំណត់</p>
-                </div>
-            </div>
-
-            <p class="khqr-msg">ការទូទាត់នឹងបញ្ជាក់ដោយស្វ័យប្រវត្តិ</p>
-
-            <div class="timer-box">
-                សុពលភាព QR កូដ: <span id="countdown-timer" style="font-weight:bold; color:#ff4d4f;">07:00</span>
-            </div>
-
-            <div class="loading-status" id="payment-spinner">
-                <div class="spinner"></div>
-                <p>កំពុងរង់ចាំការបាញ់ប្រាក់...</p>
-            </div>
-            
-            <button class="btn-secondary" style="margin-top:15px; width:100%;" onclick="closeModal()">បោះបង់ការទូទាត់</button>
-        </div>
-    </div>
-
-    <div id="successAlert" class="alert-modal">
-        <div class="alert-content">
-            <div class="success-icon-box">
-                <div class="checkmark-circle">
-                    <div class="checkmark draw"></div>
-                </div>
-            </div>
-            <h2>ការទូទាត់ជោគជ័យ!</h2>
-            <p>អរគុណសម្រាប់ការគាំទ្រ! ប្រព័ន្ធនឹងផ្តល់ជូនទំនិញទៅកាន់គណនីរបស់អ្នកក្នុងពេលឆាប់ៗនេះ។</p>
-            <button class="btn-alert-close" onclick="closeSuccessAlert()">បិទ</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+    <script>
+        window.addEventListener('bakongPaymentSuccess', function(e) {
+            console.log("Payment completed for:", e.detail.session_id);
+        });
+    </script
+</body
+</html}
