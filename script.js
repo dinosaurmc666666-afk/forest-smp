@@ -1,25 +1,15 @@
-const API_BASE_URL = "https://api.apsara.lol";
-
-let currentOrder = {
-    category: "",
-    value: "",
-    price: 0,
-    ign: "",
-    email: "",
-    platform: ""
-};
+const API_BASE_URL = "http://us.apsara.lol:55071";
 
 let countdownInterval = null;
 let statusPollInterval = null;
 let paymentConfirmed = false;
 
-// ================= PAYMENT =================
 async function confirmAndPay() {
-    paymentConfirmed = false;
-
-    document.getElementById("paymentModal").style.display = "block";
     document.getElementById("qrcode-box").innerHTML =
-        "<p>Generating QR Code...</p>";
+        "<p style='font-size:13px;color:#666;'>កំពុងបង្កើតកូដទូទាត់...</p>";
+
+    document.getElementById("qr-timeout-overlay").style.display = "none";
+    document.getElementById("paymentModal").style.display = "block";
 
     const payload = {
         player_name: currentOrder.ign,
@@ -45,7 +35,7 @@ async function confirmAndPay() {
         console.log("CREATE ORDER:", result);
 
         if (!result.success) {
-            alert("⚠️ " + (result.error || "Unknown Error"));
+            alert("⚠️ " + (result.error || "Create order failed"));
             closeModal();
             return;
         }
@@ -53,7 +43,7 @@ async function confirmAndPay() {
         const transactionId = result.transaction_id;
 
         if (!transactionId) {
-            alert("❌ transaction_id missing from API");
+            alert("❌ transaction_id មិនមាន!");
             closeModal();
             return;
         }
@@ -72,16 +62,18 @@ async function confirmAndPay() {
         startCountdownTimer(420);
         startPaymentPolling(transactionId);
 
-    } catch (err) {
-        console.error(err);
-        alert("❌ Cannot connect to server");
+    } catch (error) {
+        console.error(error);
+        alert("❌ មិនអាចភ្ជាប់ API បានទេ!");
         closeModal();
     }
 }
 
-// ================= POLLING =================
 function startPaymentPolling(transactionId) {
-    clearInterval(statusPollInterval);
+
+    if (statusPollInterval) {
+        clearInterval(statusPollInterval);
+    }
 
     statusPollInterval = setInterval(async () => {
         try {
@@ -89,124 +81,74 @@ function startPaymentPolling(transactionId) {
                 `${API_BASE_URL}/api/check-status/${transactionId}`
             );
 
-            const data = await response.json();
+            const result = await response.json();
 
-            console.log("STATUS:", data);
+            console.log("STATUS:", result);
 
             if (
-                data.success &&
-                data.order_status === "paid"
+                result.success &&
+                result.order_status === "paid"
             ) {
                 paymentConfirmed = true;
 
-                clearInterval(statusPollInterval);
                 clearInterval(countdownInterval);
+                clearInterval(statusPollInterval);
 
-                closeModal();
+                document.getElementById(
+                    "paymentModal"
+                ).style.display = "none";
+
                 triggerSuccessAlert();
-                return;
             }
 
-            if (
-                data.success &&
-                data.order_status === "expired"
-            ) {
-                clearInterval(statusPollInterval);
-                clearInterval(countdownInterval);
-
-                alert("❌ QR Code Expired");
-                closeModal();
-                return;
-            }
-
-            if (!data.success) {
-                console.warn(
-                    "Waiting for transaction...",
-                    data.error
-                );
-            }
-
-        } catch (err) {
-            console.error(
-                "Polling Error:",
-                err
-            );
+        } catch (error) {
+            console.error("Polling error:", error);
         }
     }, 4000);
 }
 
-// ================= COUNTDOWN =================
 function startCountdownTimer(seconds) {
+
     clearInterval(countdownInterval);
 
     let timer = seconds;
 
     const display =
-        document.getElementById(
-            "countdown-timer"
-        );
+        document.getElementById("countdown-timer");
 
     countdownInterval = setInterval(() => {
-        const minutes = String(
+
+        const m = String(
             Math.floor(timer / 60)
         ).padStart(2, "0");
 
-        const secs = String(
+        const s = String(
             timer % 60
         ).padStart(2, "0");
 
-        if (display) {
-            display.innerText =
-                `${minutes}:${secs}`;
-        }
+        display.innerText = `${m}:${s}`;
 
         timer--;
 
         if (timer < 0) {
+
+            if (paymentConfirmed) {
+                return;
+            }
+
             clearInterval(countdownInterval);
             clearInterval(statusPollInterval);
 
-            if (!paymentConfirmed) {
-                document.getElementById(
-                    "qr-timeout-overlay"
-                ).style.display = "flex";
+            document.getElementById(
+                "qr-timeout-overlay"
+            ).style.display = "flex";
 
-                setTimeout(() => {
-                    closeModal();
-                }, 3000);
-            }
+            setTimeout(closeModal, 4000);
         }
+
     }, 1000);
 }
 
-// ================= SUCCESS =================
-function triggerSuccessAlert() {
-    const modal =
-        document.getElementById(
-            "successAlert"
-        );
-
-    modal.style.display = "flex";
-
-    setTimeout(() => {
-        modal.classList.add("active");
-    }, 50);
-}
-
-function closeSuccessAlert() {
-    const modal =
-        document.getElementById(
-            "successAlert"
-        );
-
-    modal.classList.remove("active");
-
-    setTimeout(() => {
-        modal.style.display = "none";
-    }, 300);
-}
-
-// ================= CLOSE =================
 function closeModal() {
     document.getElementById(
         "paymentModal"
