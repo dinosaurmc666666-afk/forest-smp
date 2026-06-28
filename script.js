@@ -125,7 +125,7 @@ async function confirmAndPay() {
             closeModal();
         }
     } catch (error) {
-        alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ!");
+        alert("❌ មិនអាចតភ្ជាប់ទៅកាន់ API Server បានទេ....................!");
         closeModal();
     }
 }
