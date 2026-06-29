@@ -1,28 +1,32 @@
-// Use the same localStorage key as admin
+// ===== SHARED STORAGE KEY =====
 const STORAGE_KEY = 'store_products';
 
+// ===== GET PRODUCTS FROM LOCAL STORAGE =====
 function getProducts() {
     try {
-        // Try to get from localStorage
         const data = localStorage.getItem(STORAGE_KEY);
         if (data) {
-            return JSON.parse(data);
+            const parsed = JSON.parse(data);
+            if (parsed && parsed.length > 0) {
+                return parsed;
+            }
         }
-        // If no data, initialize with defaults
+        // Initialize with default products if none exist
         const defaults = [
-            { id: 1, title: 'Economy Plugin', price: 19.99, discount: 10, category: 'plugins', image: '', stock: 2 },
-            { id: 2, title: 'RPG Plugin', price: 29.99, discount: 0, category: 'plugins', image: '', stock: 0 },
-            { id: 3, title: 'Auto Sell Script', price: 14.99, discount: 20, category: 'scripts', image: '', stock: 1 },
-            { id: 4, title: 'Rank System', price: 24.99, discount: 15, category: 'projects', image: '', stock: 0 }
+            { id: 1, title: 'Economy Plugin', price: 19.99, discount: 10, category: 'plugins', image: '', stock: 12 },
+            { id: 2, title: 'RPG Plugin', price: 29.99, discount: 0, category: 'plugins', image: '', stock: 8 },
+            { id: 3, title: 'Auto Sell Script', price: 14.99, discount: 20, category: 'scripts', image: '', stock: 15 },
+            { id: 4, title: 'Rank System', price: 24.99, discount: 15, category: 'projects', image: '', stock: 6 }
         ];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
         return defaults;
-    } catch {
+    } catch (e) {
+        console.error('Error reading products:', e);
         return [];
     }
 }
 
-const API_BASE_URL = "https://backend-11zq.onrender.com";
+const API_BASE_URL = "http://127.0.0.1:55071";
 
 let currentProduct = null;
 let countdownInterval = null;
@@ -30,9 +34,9 @@ let statusPollInterval = null;
 
 // ===== CATEGORIES =====
 const categories = [
-    { id: 'plugins', name: 'Plugins', icon: '🔌', color: '#4caf50' },
-    { id: 'scripts', name: 'Scripts', icon: '📜', color: '#fbc02d' },
-    { id: 'projects', name: 'Projects', icon: '🚀', color: '#e53935' }
+    { id: 'plugins', name: 'Plugins', icon: '🔌' },
+    { id: 'scripts', name: 'Scripts', icon: '📜' },
+    { id: 'projects', name: 'Projects', icon: '🚀' }
 ];
 
 // ===== INIT =====
@@ -53,7 +57,7 @@ function renderCategories() {
             <div class="category-card" onclick="openCategory('${cat.id}')">
                 <div class="cat-icon">${cat.icon}</div>
                 <div class="cat-name">${cat.name}</div>
-                <div class="cat-count">${count} products</div>
+                <div class="cat-count">${count} ${count === 1 ? 'product' : 'products'}</div>
                 ${count > 0 ? `<div class="cat-badge">${count}</div>` : ''}
             </div>
         `;
@@ -76,7 +80,7 @@ function openCategory(categoryId) {
         grid.innerHTML = products.map(p => `
             <div class="product-card" onclick="openPurchaseModal(${p.id})">
                 ${p.image ? `<img src="${p.image}" class="product-img" alt="${p.title}">` : 
-                    `<div class="product-img" style="display:flex;align-items:center;justify-content:center;color:#4a5568;font-size:40px;">📦</div>`}
+                    `<div class="product-img" style="display:flex;align-items:center;justify-content:center;color:#4a5568;font-size:40px;background:#0f1318;border-radius:8px;">📦</div>`}
                 <div class="product-name">${p.title}</div>
                 <div class="product-price">
                     $${p.price.toFixed(2)}
@@ -94,7 +98,10 @@ function openCategory(categoryId) {
 function openPurchaseModal(productId) {
     const products = getProducts();
     const product = products.find(p => p.id === productId);
-    if (!product) return;
+    if (!product) {
+        alert('Product not found!');
+        return;
+    }
     
     currentProduct = product;
     document.getElementById('p-product-name').textContent = product.title;
@@ -119,7 +126,10 @@ async function confirmPurchase() {
         return;
     }
     
-    if (!currentProduct) return;
+    if (!currentProduct) {
+        alert('❌ No product selected!');
+        return;
+    }
     
     closePurchaseModal();
     
@@ -159,6 +169,7 @@ async function confirmPurchase() {
             closePaymentModal();
         }
     } catch (error) {
+        console.error('Purchase error:', error);
         alert('❌ Cannot connect to server!');
         closePaymentModal();
     }
@@ -235,7 +246,13 @@ function closePaymentModal() {
 // ===== PAGE NAVIGATION =====
 function showPage(pageId) {
     document.querySelectorAll('.store-page').forEach(page => page.classList.remove('active'));
-    document.getElementById(`page-${pageId}`).classList.add('active');
+    const target = document.getElementById(`page-${pageId}`);
+    if (target) target.classList.add('active');
+    
+    // Refresh categories when going home
+    if (pageId === 'home') {
+        renderCategories();
+    }
 }
 
 // ===== ADMIN ACCESS =====
@@ -251,8 +268,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== REFRESH PRODUCTS WHEN ADMIN MAKES CHANGES =====
-// Listen for storage changes from other tabs/windows
+// ===== LISTEN FOR STORAGE CHANGES (cross-tab sync) =====
 window.addEventListener('storage', (e) => {
     if (e.key === STORAGE_KEY) {
         // Products were updated in another tab
@@ -262,13 +278,15 @@ window.addEventListener('storage', (e) => {
             if (pageId === 'home') {
                 renderCategories();
             } else if (pageId === 'shop') {
-                // Re-render current category
+                // Re-render current category if we're on shop page
                 const categoryName = document.getElementById('shop-category-name').textContent;
-                categories.forEach(cat => {
-                    if (categoryName.includes(cat.name)) {
-                        openCategory(cat.id);
-                    }
-                });
+                if (categoryName) {
+                    categories.forEach(cat => {
+                        if (categoryName.includes(cat.name)) {
+                            openCategory(cat.id);
+                        }
+                    });
+                }
             }
         }
     }
