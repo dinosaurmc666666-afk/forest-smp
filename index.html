@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOREST-SMP | Store</title>
+    <title>FOREST-SMP</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -124,28 +124,41 @@
 
     </div>
 
+    <div id="global-loader" class="modal">
+        <div class="loading-status">
+            <div class="spinner" style="width: 50px; height: 50px; border-width: 5px; border-top-color: #ffd66b;"></div>
+            <p style="color: white; margin-top: 15px; font-size: 18px; font-weight: bold;">Generating KHQR...</p>
+        </div>
+    </div>
+
     <div id="paymentModal" class="modal">
-        <div class="modal-content">
-            <h2 class="khqr-title">KHQR PAYMENT</h2>
-            <p class="khqr-subtitle">SCAN ANY BANKING IN CAMBODIA.</p>
-            
-            <div class="qr-container">
-                <div id="qrcode-box"></div>
-                <div id="qr-timeout-overlay" class="timeout-overlay"></div>
+        <div class="khqr-card-container">
+            <div class="khqr-real-card">
+                <div class="khqr-header">
+                    <h2>KHQR</h2>
+                    <div class="corner-fold"></div>
+                </div>
+                <div class="khqr-body">
+                    <p class="khqr-name">FOREST-SMP</p>
+                    <p class="khqr-price" id="display-khqr-price">$0</p>
+                    <hr class="khqr-dashed">
+                    
+                    <div class="qr-container">
+                        <div id="qrcode-box"></div>
+                        <div id="qr-timeout-overlay" class="timeout-overlay"></div>
+                    </div>
+                </div>
             </div>
-
-            <p class="khqr-msg">PAY TO BUY RANK NOW, FASTER.</p>
-
+            
             <div class="timer-box">
-                THIS QR CODE IS VALID: <span id="countdown-timer">07:00</span>
+                VALID FOR: <span id="countdown-timer">07:00</span>
             </div>
-
-            <div class="loading-status" id="payment-spinner">
+            <div class="loading-status" style="margin-top: 15px;">
                 <div class="spinner"></div>
-                <p>WAITING FOR BANK TRANSFER...</p>
+                <p style="color: white;">Waiting for bank transfer...</p>
             </div>
             
-            <button class="btn-secondary" style="margin-top:15px; width:100%;" onclick="closeModal()">CLOSE</button>
+            <button class="btn-danger" style="margin-top:15px; width:100%; border:none; box-shadow:none;" onclick="closeModal()">CANCEL PAYMENT</button>
         </div>
     </div>
 
@@ -165,5 +178,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="script.js"></script>
 </body>
-                            </html>
-            
+    </html>
+                        
