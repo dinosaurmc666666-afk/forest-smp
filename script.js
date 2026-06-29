@@ -4,7 +4,7 @@ const API_BASE_URL = "https://backend-11zq.onrender.com";
 const TELEGRAM_BOT_TOKEN = "8998859713:AAFOvcttVnqZip52L3dhtPFvWFaTrgQ4TGY";
 // ⚠️ អ្នកត្រូវដាក់លេខ ID របស់ Group ត្រង់នេះ! (ឧទាហរណ៍: -100123456789)
 // របៀបរក: ទាញ @RawDataBot ចូល Group រួចយកលេខ ID ដែលវាលោតប្រាប់ មកដាក់ត្រង់នេះ។
-const TELEGRAM_CHAT_ID = "-100XXXXXXXXXX"; 
+const TELEGRAM_CHAT_ID = "--1004495647556"; 
 
 let currentOrder = { category: '', value: '', price: 0, ign: '', email: '', platform: '' };
 let countdownInterval = null;
