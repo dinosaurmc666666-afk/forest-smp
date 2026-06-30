@@ -1,10 +1,10 @@
-const API_BASE_URL = "https://backend-11zq.onrender.com"; 
+// 🛑 ប្តូរមកប្រើ URL របស់ Apsara Hosting វិញ (ប្រើត្រឹម http បានហើយ)
+const API_BASE_URL = "http://us.apsara.lol:55071"; 
 
 // 🛑 កន្លែងកំណត់ TELEGRAM BOT (Task 3)
 const TELEGRAM_BOT_TOKEN = "8998859713:AAFOvcttVnqZip52L3dhtPFvWFaTrgQ4TGY";
 // ⚠️ អ្នកត្រូវដាក់លេខ ID របស់ Group ត្រង់នេះ! (ឧទាហរណ៍: -100123456789)
-// របៀបរក: ទាញ @RawDataBot ចូល Group រួចយកលេខ ID ដែលវាលោតប្រាប់ មកដាក់ត្រង់នេះ។
-const TELEGRAM_CHAT_ID = "--1004495647556"; 
+const TELEGRAM_CHAT_ID = "-1004495647556"; 
 
 let currentOrder = { category: '', value: '', price: 0, ign: '', email: '', platform: '' };
 let countdownInterval = null;
@@ -223,4 +223,4 @@ function closeModal() {
     document.getElementById("paymentModal").style.display = "none";
     if (countdownInterval) clearInterval(countdownInterval);
     if (statusPollInterval) clearInterval(statusPollInterval);
-        }
+}
